@@ -1,3 +1,4 @@
+const $NORMAL_ITEM = 0;
 const $WIDE_ITEM = 1;
 const $HIGH_ITEM = 2;
 const $MAIN_ITEM = 3;
@@ -9,6 +10,9 @@ var elemsWidthPC, elemsHeightPC;
 var availableNormalPos, availableWidePos, availableHighPos;
 var usualItems, usualItemsCursor, defaultItem;
 var initialScreenRatio;
+var resizeCallback;
+var spacingWidthPC, spacingHeightPC;
+var hidetimer = 0;
 
 // Initialization
 //---------------
@@ -17,12 +21,28 @@ function RandGrid(selector, args) {
 	//-----------------
 	linesNbr = args.hasOwnProperty('linesNbr') ? args.linesNbr : 4;
 	columnsNbr = args.hasOwnProperty('columnsNbr') ? args.columnsNbr : 5;
+	if (args.hasOwnProperty('autoinvert')) {		// Auto invert number of column/lines for high screens
+		if (window.innerHeight > window.innerWidth && args.autoinvert) {
+			let val = linesNbr;
+			linesNbr = columnsNbr;
+			columnsNbr = val;
+		}
+	}
 	wideItemsToBuildCnt = args.hasOwnProperty('wideitems') ? args.wideitems : 3;
 	highItemsToBuildCnt = args.hasOwnProperty('highitems') ? args.highitems : 2;
+	resizeCallback = args.hasOwnProperty('resizer') ? args.resizer : null;
+	let spacing = args.hasOwnProperty('spacing') ? args.spacing : 0;
+	//-----
+	spacingWidthPC = spacing / window.innerWidth * 100;
+	spacingHeightPC = spacing / window.innerHeight * 100;
 	//-----
 	initialScreenRatio = window.innerWidth - window.innerHeight;
-	elemsWidthPC = (100 / columnsNbr), elemsHeightPC = (100 / linesNbr);
-	availableNormalPos = new Array(), availableWidePos = new Array(), availableHighPos = new Array();
+	let workWidthSize = (window.innerWidth - (spacing * (columnsNbr - 1)));
+	let workHeightSize = (window.innerHeight - (spacing * (linesNbr - 1)));
+	let elemsWidth = workWidthSize / columnsNbr;
+	let elemsHeight = workHeightSize / linesNbr;
+	elemsWidthPC = elemsWidth / window.innerWidth * 100;
+	elemsHeightPC = elemsHeight / window.innerHeight * 100;
 
 	// Data retrieval
 	//---------------
@@ -47,8 +67,13 @@ function RandGrid(selector, args) {
 	else
 		randgrid.removeChild(defaultItem);
 
+	// Remove the hider, now that the DOM users items have been deleted
+	//-----------------------------------------------------------------
+	document.getElementById('hider').style.display = 'none';
+
 	// Available positions initialisation
 	//-----------------------------------
+	availableNormalPos = new Array(), availableWidePos = new Array(), availableHighPos = new Array();
 	for (let i = 0; i < linesNbr; i++) {
 		for (let j = 0; j < columnsNbr; j++) {
 			availableNormalPos.push({ x: i, y: j });
@@ -65,7 +90,7 @@ function RandGrid(selector, args) {
 			y: (Math.floor(Math.random() * (columnsNbr - 1)))
 		};
 		DisableRelatedPositions($MAIN_ITEM, mainItemPos);
-		AddGridItem(mainItemPos, mainItem.innerHTML, { wide: true, high: true }, '_rg-menu');
+		AddGridItem(mainItemPos, mainItem.innerHTML, { wide: true, high: true, hidetimer: 0 }, '_rg-menu');
 	}
 	//========== Determine the large items positions ==========
 	let wideItemsPos = new Array(wideItemsToBuildCnt), highItemsPos = new Array(highItemsToBuildCnt);
@@ -82,9 +107,9 @@ function RandGrid(selector, args) {
 		DisableRelatedPositions($HIGH_ITEM, highItemsPos[i]);
 	}
 	//========== Draw the items ==========
-	wideItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem), { wide: true }));
-	highItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem), { high: true }));	
-	availableNormalPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem)));
+	wideItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent($WIDE_ITEM), { wide: true }));
+	highItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent($HIGH_ITEM), { high: true }));
+	availableNormalPos.sort(() => .5 - Math.random()).forEach(elem => AddGridItem(elem, GetNextItemContent($NORMAL_ITEM)));
 
 	// Events
 	//-------
@@ -95,7 +120,6 @@ function RandGrid(selector, args) {
 
 			// Invert lines/columns and sizes
 			//-------------------------------
-			console.log(randgrid, randgrid.querySelectorAll('_rg-item'));
 			randgrid.querySelectorAll('._rg-item').forEach(function(elem) {
 				let baseWidth = elem.style.width;
 				elem.style.width = elem.style.height;
@@ -106,16 +130,26 @@ function RandGrid(selector, args) {
 				elem.style.top = baseLeft;
 			});
 		}
+		//-----
+		if (resizeCallback != null)
+			resizeCallback();
 	});
+
+	return randgrid;
 }
 
 // Tools functions
 //----------------
-function GetNextItemContent(gridItem) {
+function GetNextItemContent(itemType) {
 	if (usualItemsCursor >= usualItems.length)
-		return (defaultItem == null ? `` : defaultItem.innerHTML);
-	else
+		return (defaultItem == null ? '' : defaultItem.innerHTML);
+	else {
+		if (itemType == $HIGH_ITEM && usualItems[usualItemsCursor].classList.contains('nohigh'))
+			return defaultItem.innerHTML;
+		else if (itemType == $WIDE_ITEM && usualItems[usualItemsCursor].classList.contains('nowide'))
+			return defaultItem.innerHTML;
 		return usualItems[usualItemsCursor++].innerHTML;
+	}
 }
 function RemovePos(posVector, posToRemove) {
 	let posFound = posVector.findIndex(pos => (pos.x == posToRemove.x && pos.y == posToRemove.y));
@@ -167,11 +201,14 @@ function AddGridItem(elem, content, params = {}, id = null) {
 	if (params.high) gridItem.classList.add('_rg-high');
 	gridItem.classList.add('_rg-item');
 	if (id !== null) gridItem.id = id;
-	gridItem.style.width = (elemsWidthPC * (params.wide ? 2 : 1)) + "%";
-	gridItem.style.height = (elemsHeightPC * (params.high ? 2 : 1)) + "%";
-	gridItem.style.left = (elem.y * elemsWidthPC) + "%";
-	gridItem.style.top = (elem.x * elemsHeightPC) + "%";
 	//-----
+	gridItem.style.width = (elemsWidthPC * (params.wide ? 2 : 1) + (params.wide ? spacingWidthPC : 0)) + "%";
+	gridItem.style.height = ((elemsHeightPC * (params.high ? 2 : 1)) + (params.high ? spacingHeightPC : 0)) + "%";
+	gridItem.style.left = (elem.y * (elemsWidthPC + spacingWidthPC)) + "%";
+	gridItem.style.top = (elem.x * (elemsHeightPC + spacingHeightPC)) + "%";
+	//-----
+	gridItem.style.animationDelay = hidetimer + 'ms';
+	hidetimer += 25;
 	gridItem.innerHTML = content;
 	//-----
 	randgrid.appendChild(gridItem);

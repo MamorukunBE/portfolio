@@ -1,14 +1,20 @@
 ._rg {
-	display: flex;
-	flex-wrap: wrap;
+	position: relative;
+	width: 100vw;
 	height: 100vh;
 }
 ._rg>* {
 	position: absolute;
-	border: 1px solid blue;
 	display: flex;
 	align-items: flex-end;
+	opacity: 0;
+	animation-name: opacityOff;
+	animation-duration: 500ms;
+	animation-delay: 0s;
+	animation-fill-mode: forwards;
+	animation-iteration-count: 1;
 }
-._rg ._rg-wide { background-color: rgba(255,0,0,.5); }
-._rg ._rg-high { background-color: rgba(0,255,0,.5); }
-._rg #_rg-menu { background-color: rgba(0,0,255,.5); }
+@keyframes opacityOff {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
