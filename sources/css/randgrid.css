@@ -1,0 +1,14 @@
+._rg {
+	display: flex;
+	flex-wrap: wrap;
+	height: 100vh;
+}
+._rg>* {
+	position: absolute;
+	border: 1px solid blue;
+	display: flex;
+	align-items: flex-end;
+}
+._rg ._rg-wide { background-color: rgba(255,0,0,.5); }
+._rg ._rg-high { background-color: rgba(0,255,0,.5); }
+._rg #_rg-menu { background-color: rgba(0,0,255,.5); }

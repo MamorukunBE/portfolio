@@ -23,6 +23,12 @@ gulp.task('sass-work', function () {
 		.pipe(rename({extname: ".min.css"}))
 		.pipe(gulp.dest(output + 'css/'));
 });
+gulp.task('css-work', function () {
+	return gulp.src(sources + 'css/*.css')
+		.pipe(autoprefixer({ cascade: false }))
+		.pipe(rename({ extname: ".min.css" }))
+		.pipe(gulp.dest(output + 'css/'));
+});
 gulp.task('js-work', function JS_compressor() {
 	return pipeline(
 		gulp.src(sources + 'script/*.js'),
@@ -59,6 +65,7 @@ exports.default = () => (
 gulp.task('modifications-checker', gulp.series(
 	'js-work',			// Pre-feed the output before initializing browser-sync
 	'sass-work',		//
+	'css-work',			//	
 	'img-work',			//
 	'html-work',		//
 	gulp.parallel(
@@ -66,6 +73,7 @@ gulp.task('modifications-checker', gulp.series(
 		function sources_checker() {
 			gulp.watch(sources + 'script/*.js', gulp.series('js-work'));
 			gulp.watch(sources + 'css/**/*.scss', gulp.series('sass-work'));
+			gulp.watch(sources + 'css/*.css', gulp.series('css-work'));
 			gulp.watch(sources + '*.html', gulp.series('html-work'));
 			gulp.watch(sources + 'img/*.*', gulp.series('img-work'));
 		},

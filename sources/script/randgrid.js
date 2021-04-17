@@ -8,6 +8,7 @@ var wideItemsToBuildCnt, highItemsToBuildCnt;
 var elemsWidthPC, elemsHeightPC;
 var availableNormalPos, availableWidePos, availableHighPos;
 var usualItems, usualItemsCursor, defaultItem;
+var initialScreenRatio;
 
 // Initialization
 //---------------
@@ -19,6 +20,7 @@ function RandGrid(selector, args) {
 	wideItemsToBuildCnt = args.hasOwnProperty('wideitems') ? args.wideitems : 3;
 	highItemsToBuildCnt = args.hasOwnProperty('highitems') ? args.highitems : 2;
 	//-----
+	initialScreenRatio = window.innerWidth - window.innerHeight;
 	elemsWidthPC = (100 / columnsNbr), elemsHeightPC = (100 / linesNbr);
 	availableNormalPos = new Array(), availableWidePos = new Array(), availableHighPos = new Array();
 
@@ -26,6 +28,7 @@ function RandGrid(selector, args) {
 	//---------------
 	if ((randgrid = document.querySelector(selector)) == null)
 		return ReportError($ERROR, `Document ${selector} not found`);
+	randgrid.classList.add('_rg');
 	//-----
 	let mainItem;
 	if ((mainItem = randgrid.querySelector('.main')) == null)
@@ -62,7 +65,7 @@ function RandGrid(selector, args) {
 			y: (Math.floor(Math.random() * (columnsNbr - 1)))
 		};
 		DisableRelatedPositions($MAIN_ITEM, mainItemPos);
-		AddGridItem(mainItemPos, mainItem.innerHTML, { wide: true, high: true }, 'menu-item');
+		AddGridItem(mainItemPos, mainItem.innerHTML, { wide: true, high: true }, '_rg-menu');
 	}
 	//========== Determine the large items positions ==========
 	let wideItemsPos = new Array(wideItemsToBuildCnt), highItemsPos = new Array(highItemsToBuildCnt);
@@ -82,6 +85,28 @@ function RandGrid(selector, args) {
 	wideItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem), { wide: true }));
 	highItemsPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem), { high: true }));	
 	availableNormalPos.forEach(elem => AddGridItem(elem, GetNextItemContent(elem)));
+
+	// Events
+	//-------
+	window.addEventListener('resize', function(event) {
+		let currentScreenRatio = window.innerWidth - window.innerHeight;
+		if (initialScreenRatio * currentScreenRatio < 0) {
+			initialScreenRatio = currentScreenRatio;
+
+			// Invert lines/columns and sizes
+			//-------------------------------
+			console.log(randgrid, randgrid.querySelectorAll('_rg-item'));
+			randgrid.querySelectorAll('._rg-item').forEach(function(elem) {
+				let baseWidth = elem.style.width;
+				elem.style.width = elem.style.height;
+				elem.style.height = baseWidth;
+				//-----
+				let baseLeft = elem.style.left;
+				elem.style.left = elem.style.top;
+				elem.style.top = baseLeft;
+			});
+		}
+	});
 }
 
 // Tools functions
@@ -138,9 +163,9 @@ function DisableRelatedPositions(removerType, removerPos) {
 }
 function AddGridItem(elem, content, params = {}, id = null) {
 	let gridItem = document.createElement('div');
-	if (params.wide) gridItem.classList.add('rg-wide');
-	if (params.high) gridItem.classList.add('rg-high');
-	gridItem.classList.add('rg-item');
+	if (params.wide) gridItem.classList.add('_rg-wide');
+	if (params.high) gridItem.classList.add('_rg-high');
+	gridItem.classList.add('_rg-item');
 	if (id !== null) gridItem.id = id;
 	gridItem.style.width = (elemsWidthPC * (params.wide ? 2 : 1)) + "%";
 	gridItem.style.height = (elemsHeightPC * (params.high ? 2 : 1)) + "%";
