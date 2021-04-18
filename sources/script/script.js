@@ -24,11 +24,11 @@ window.addEventListener('load', function() {
 				//-----
 				if (computedRect.left < 0)
 					borderDeltaWidth += computedRect.left;
-				else if (computedRect.right > window.innerWidth)
-					borderDeltaWidth += (computedRect.right - window.innerWidth);
+				else if (computedRect.right >= window.innerWidth)
+					borderDeltaWidth += (computedRect.right - window.innerWidth) + 1;		// Why that damn +1 ??? Because of the shadow perhaps ?
 				if (computedRect.top < 0)
 					borderDeltaHeight += computedRect.top;
-				else if (computedRect.bottom > window.innerHeight)
+				else if (computedRect.bottom >= window.innerHeight)
 					borderDeltaHeight += (computedRect.bottom - window.innerHeight);
 
 				// Inflate the container
