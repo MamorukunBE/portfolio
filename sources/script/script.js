@@ -1,6 +1,6 @@
-var randgrid;
+var randgrid, crazyOn = false;
 window.addEventListener('load', function() {
-	randgrid = RandGrid('#pf_grid', { linesNbr: 4, columnsNbr: 5, autoinvert: true, wideitems: 3, highitems: 2, resizer: resizeImages, spacing: 7 });
+	randgrid = RandGrid('#pf_grid', { linesNbr: 4, columnsNbr: 5, autoinvert: true, wideitems: 3, highitems: 2, resizer: resizeImages, spacing: 7, padding: 5 });
 	resizeImages();
 	randomDefaultImages();
 	randgrid.querySelectorAll('._rg-item').forEach(function(elem) {
@@ -11,31 +11,32 @@ window.addEventListener('load', function() {
 				//--------------------------------------------------------------------
 				let contentImg = content.querySelector('img');
 				//-----
-				let borderDeltaWidth = Math.floor((contentImg.offsetWidth - content.offsetWidth) / 2);
-				let borderDeltaHeight = Math.floor((contentImg.offsetHeight - content.offsetHeight) / 2);
+				let borderDeltaWidth = (contentImg.offsetWidth - content.offsetWidth) / 2;
+				let borderDeltaHeight = (contentImg.offsetHeight - content.offsetHeight) / 2;
 				//-----
 				var imgRect = content.getBoundingClientRect();
 				let computedRect = {
 					top: imgRect.top - borderDeltaHeight,
 					right: imgRect.right + borderDeltaWidth,
 					bottom: imgRect.bottom + borderDeltaHeight,
-					left: imgRect.left - borderDeltaWidth,
+					left: imgRect.left - borderDeltaWidth
 				};
 				//-----
 				if (computedRect.left < 0)
 					borderDeltaWidth += computedRect.left;
 				else if (computedRect.right >= window.innerWidth)
-					borderDeltaWidth += (computedRect.right - window.innerWidth) + 1;		// Why that damn +1 ??? Because of the shadow perhaps ?
+					borderDeltaWidth += (computedRect.right - window.innerWidth) + 1;		// +1 to solve a probable rounding problem (no time to check further now)
 				if (computedRect.top < 0)
 					borderDeltaHeight += computedRect.top;
-				else if (computedRect.bottom >= window.innerHeight)
-					borderDeltaHeight += (computedRect.bottom - window.innerHeight);
+				else if (computedRect.bottom >= window.innerHeight) {
+					borderDeltaHeight += (computedRect.bottom - window.innerHeight) + 1;		// +1 to solve a probable rounding problem (no time to check further now)
+				}
 
 				// Inflate the container
 				//----------------------
 				content.style.width = Math.min(contentImg.offsetWidth, window.innerWidth) + "px";
 				content.style.height = Math.min(contentImg.offsetHeight, window.innerHeight) + "px";
-				content.style.transform = `translate(-${borderDeltaWidth}px, -${borderDeltaHeight}px)`;
+				content.style.transform = `translate(-${Math.ceil(borderDeltaWidth)}px, -${Math.ceil(borderDeltaHeight)}px)`;
 				content.parentNode.style.zIndex = 20;
 				content.dataset.inflating = true;
 			});
@@ -47,6 +48,12 @@ window.addEventListener('load', function() {
 			});
 			content.addEventListener('transitionend', function (event) { InflationDone(event, content); })
 		}
+	});
+	randgrid.querySelector('#crazy').addEventListener('click', function (elem) {
+		if (crazyOn)
+			elem.target.checked = false;
+		crazyOn = !crazyOn;
+		randgrid.querySelectorAll('.maincontent, .linkscontent, .infocontent').forEach((elem) => elem.classList.toggle('crazyBackground', crazyOn));
 	});
 });
 function InflationDone(event, item) {

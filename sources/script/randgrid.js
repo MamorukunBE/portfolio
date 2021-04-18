@@ -11,7 +11,7 @@ var availableNormalPos, availableWidePos, availableHighPos;
 var usualItems, usualItemsCursor, defaultItem;
 var initialScreenRatio;
 var resizeCallback;
-var spacingWidthPC, spacingHeightPC;
+var spacingWidthPC, spacingHeightPC, paddingWidthPC, paddingHeightPC;
 var hidetimer = 0;
 
 // Initialization
@@ -31,14 +31,17 @@ function RandGrid(selector, args) {
 	wideItemsToBuildCnt = args.hasOwnProperty('wideitems') ? args.wideitems : 3;
 	highItemsToBuildCnt = args.hasOwnProperty('highitems') ? args.highitems : 2;
 	resizeCallback = args.hasOwnProperty('resizer') ? args.resizer : null;
-	let spacing = args.hasOwnProperty('spacing') ? args.spacing : 0;
 	//-----
+	let spacing = args.hasOwnProperty('spacing') ? args.spacing : 0;
 	spacingWidthPC = spacing / window.innerWidth * 100;
 	spacingHeightPC = spacing / window.innerHeight * 100;
+	let gridPadding = args.hasOwnProperty('padding') ? args.padding : 0;
+	paddingWidthPC = gridPadding / window.innerWidth * 100;
+	paddingHeightPC = gridPadding / window.innerHeight * 100;
 	//-----
 	initialScreenRatio = window.innerWidth - window.innerHeight;
-	let workWidthSize = (window.innerWidth - (spacing * (columnsNbr - 1)));
-	let workHeightSize = (window.innerHeight - (spacing * (linesNbr - 1)));
+	let workWidthSize = (window.innerWidth - (spacing * (columnsNbr - 1)) - (gridPadding * 2));
+	let workHeightSize = (window.innerHeight - (spacing * (linesNbr - 1)) - (gridPadding * 2));
 	let elemsWidth = workWidthSize / columnsNbr;
 	let elemsHeight = workHeightSize / linesNbr;
 	elemsWidthPC = elemsWidth / window.innerWidth * 100;
@@ -204,8 +207,8 @@ function AddGridItem(elem, content, params = {}, id = null) {
 	//-----
 	gridItem.style.width = (elemsWidthPC * (params.wide ? 2 : 1) + (params.wide ? spacingWidthPC : 0)) + "%";
 	gridItem.style.height = ((elemsHeightPC * (params.high ? 2 : 1)) + (params.high ? spacingHeightPC : 0)) + "%";
-	gridItem.style.left = (elem.y * (elemsWidthPC + spacingWidthPC)) + "%";
-	gridItem.style.top = (elem.x * (elemsHeightPC + spacingHeightPC)) + "%";
+	gridItem.style.left = paddingWidthPC + (elem.y * (elemsWidthPC + spacingWidthPC)) + "%";
+	gridItem.style.top = paddingHeightPC + (elem.x * (elemsHeightPC + spacingHeightPC)) + "%";
 	//-----
 	gridItem.style.animationDelay = hidetimer + 'ms';
 	hidetimer += 25;
