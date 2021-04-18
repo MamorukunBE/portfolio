@@ -64,6 +64,9 @@
 		}
 		h2 {
 			text-align: center;
+			@media screen and (max-width: 1024px) { font-size: 18px; }
+			@media screen and (max-width: 560px) { font-size: 14px; }
+			@media screen and (max-width: 380px) { font-size: 12px; }
 		}
 	}
 	.maincontent {
