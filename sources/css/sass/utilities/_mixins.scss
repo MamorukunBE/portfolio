@@ -3,7 +3,7 @@
 	box-shadow: none;
 }
 @mixin sadback {
-	background: rgb(61, 61, 61);
+	background: $baseItemsBackColor;
 	box-shadow: inset 0px 0px 15px 5px #000000;
 }
 @mixin titlesSpecs {

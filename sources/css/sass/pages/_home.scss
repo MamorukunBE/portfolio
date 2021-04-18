@@ -9,8 +9,8 @@ body { background-color: white; }
 	z-index: 100;
 	background: rgba(0, 0, 0, 1);
 }
-#pf_grid {
-	background-color: white;	
+#pf_grid {	
+	background-color: lighten($baseItemsBackColor, 45%);
 	.maincontent, .linkscontent, .infocontent {
 		width: 100%;
 		height: 100%;
@@ -60,6 +60,7 @@ body { background-color: white; }
 		}
 	}
 	.linkscontent, .infocontent {
+		padding-top: 10px;
 		a:first-child p {
 			margin-top: 0;
 		}
@@ -85,7 +86,7 @@ body { background-color: white; }
 		}
 		h1 {
 			@include titlesSpecs;			
-			font-size: 19px;
+			font-size: 24px;
 			letter-spacing: 2px;
 			word-spacing: 10px;
 			text-transform: uppercase;
@@ -130,8 +131,10 @@ body { background-color: white; }
 		border-radius: 10px;
 		overflow: hidden;
 		transition: all .2s ease-in-out;
+		background-color: black;
 		cursor: pointer;
 		i {
+			color: greenyellow;
 			position: absolute;
 			top: 0;
 			right: 0;
