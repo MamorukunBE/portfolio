@@ -1,10 +1,13 @@
 @mixin crazyback {
- 	background: linear-gradient(35deg, rgba(0,0,0,0) 0%, rgba(255, 0, 0, 0.589) 100%),linear-gradient(100deg, rgba(0,0,0,0) 0%, rgba(0, 119, 255, 0.733) 100%),linear-gradient(300deg, rgba(0,0,0,0) 0%, rgb(31, 150, 33) 67%, rgba(43, 255, 47, 0.733) 100%);
+	background: linear-gradient(35deg, rgba(0,0,0,0) 0%, rgba(255, 0, 0, 0.589) 100%),linear-gradient(100deg, rgba(0,0,0,0) 0%, rgba(0, 119, 255, 0.733) 100%),linear-gradient(300deg, rgba(0,0,0,0) 0%, rgb(31, 150, 33) 67%, rgba(43, 255, 47, 0.733) 100%);
+	box-shadow: none;
 }
 @mixin sadback {
-	background: rgb(29, 29, 29);
+	background: rgb(61, 61, 61);
+	box-shadow: inset 0px 0px 15px 5px #000000;
 }
-@mixin baseFontColor {
-	color: white;
+@mixin titlesSpecs {
 	text-shadow: #FC0 0 0 10px;
+	font-family: 'Comfortaa', cursive;
+	font-style: italic;
 }
